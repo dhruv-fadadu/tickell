@@ -3,6 +3,7 @@ const cors = require("cors");
 const bodyParser = require("body-parser");
 
 const userRoutes = require("./routes/userRoutes");
+const eventRoutes = require("./routes/eventRoutes");
 const sequelize = require("./config/db");
 require("dotenv").config();
 
@@ -14,6 +15,7 @@ app.use(cors());
 app.use(bodyParser.json());
 
 app.use("/api/users", userRoutes);
+app.use("/api/events", eventRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello, PostgreSQL!");

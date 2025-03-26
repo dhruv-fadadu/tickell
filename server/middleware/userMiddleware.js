@@ -15,9 +15,14 @@ const validateCreateUser = async (req, res, next) => {
   }
 
   // check if the email is taken
-  const existingUserWithEmail = await User.findOne({ where: { email } });
-  if (existingUserWithEmail) {
-    return res.status(400).json({ message: "Email is already taken" });
+  try {
+    const existingUserWithEmail = await User.findOne({ where: { email } });
+    if (existingUserWithEmail) {
+      return res.status(400).json({ message: "Email is already taken" });
+    }
+  } catch {
+    console.error("Error while finding the user by email: ", error);
+    throw error;
   }
 
   // password length check

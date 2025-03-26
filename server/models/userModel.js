@@ -1,4 +1,4 @@
-const { DataTypes, Model } = require("sequelize");
+const { DataTypes, Model, Sequelize } = require("sequelize");
 const bcrypt = require("bcryptjs");
 
 const sequelize = require("../config/db");
@@ -42,12 +42,12 @@ User.init(
     },
     created_at: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: Sequelize.NOW,
       allowNull: false,
     },
     updated_at: {
       type: DataTypes.DATE,
-      defaultValue: DataTypes.NOW,
+      defaultValue: Sequelize.NOW,
       allowNull: false,
     },
   },
@@ -68,18 +68,4 @@ User.beforeUpdate((user) => {
   user.updated_at = new Date();
 });
 
-const findUserByEmail = async (email) => {
-  try {
-    const matchedUser = await User.findOne({
-      where: {
-        email: email,
-      },
-    });
-    return matchedUser;
-  } catch (error) {
-    console.error("Error while finding the user by email: ", error);
-    throw error;
-  }
-};
-
-module.exports = { User, findUserByEmail };
+module.exports = { User };

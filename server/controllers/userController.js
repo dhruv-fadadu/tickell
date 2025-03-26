@@ -1,18 +1,12 @@
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
-const { User, findUserByEmail } = require("../models/userModel");
+const { User } = require("../models/userModel");
 
 // Controller to handle user registration
 const registerUser = async (req, res) => {
   const { username, email, password, phone_num, profile_info, role } = req.body;
 
   try {
-    const existingUser = await findUserByEmail(email);
-    if (existingUser) {
-      return res.status(400).json({ message: "Email already exists" });
-    }
-
-    // Create a new user
     const newUser = await User.create({
       username,
       email,
