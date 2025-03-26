@@ -4,6 +4,7 @@ const bodyParser = require("body-parser");
 
 const userRoutes = require("./routes/userRoutes");
 const eventRoutes = require("./routes/eventRoutes");
+const ticketRoutes = require("./routes/ticketRoutes");
 const sequelize = require("./config/db");
 require("dotenv").config();
 
@@ -16,6 +17,7 @@ app.use(bodyParser.json());
 
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/tickets", ticketRoutes);
 
 app.get("/", (req, res) => {
   res.send("Hello, PostgreSQL!");
