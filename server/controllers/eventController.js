@@ -1,29 +1,25 @@
 const { Event } = require("../models/eventModel");
+const {
+  successResponse,
+  clientResponse,
+  serverResponse,
+} = require("../utils/responseHandler");
 
 const registerEvent = async (req, res) => {
   try {
     const newEvent = await Event.create(req.body);
-    return res.status(201).json({
-      message: "Event registered successfully",
-      event: newEvent,
-    });
+    successResponse(res, 201, "Event registered successfully", newEvent);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error while registering event", error: error.message });
+    serverResponse(res, 500, "Error while registering event", error);
   }
 };
 
 const getEvents = async (req, res) => {
   try {
     const events = await Event.findAll();
-    return res.status(200).json(events);
+    successResponse(res, 200, "Success", events);
   } catch (error) {
-    return res.status(500).json({
-      message: "Error while fetching all events",
-      error: error.message,
-    });
+    serverResponse(res, 500, "Error while fetching all events", error);
   }
 };
 
@@ -31,15 +27,11 @@ const getEventById = async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);
     if (!event) {
-      return res
-        .status(404)
-        .json({ message: "Event not found", error: error.message });
+      clientResponse(res, 404, "Event not found");
     }
-    return res.status(200).json(event);
+    successResponse(res, 200, "Success", event);
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error while fetching a event", error: error.message });
+    serverResponse(res, 500, "Error while fetching a event", error);
   }
 };
 
@@ -47,22 +39,12 @@ const updateEvent = async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);
     if (!event) {
-      return res
-        .status(404)
-        .json({ message: "Event not found", error: error.message });
+      clientResponse(res, 404, "Event not found");
     }
     const updatedEvent = await event.update(req.body);
-    return res
-      .status(200)
-      .json({ message: "Event updated successfully", event: updatedEvent });
+    successResponse(res, 200, "Event updated successfully", updatedEvent);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({
-        message: "Error while updating the event",
-        error: error.message,
-      });
+    serverResponse(res, 500, "Error while updating the event", error);
   }
 };
 
@@ -70,17 +52,17 @@ const deleteEvent = async (req, res) => {
   try {
     const event = await Event.findByPk(req.params.id);
     if (!event) {
-      return res
-        .status(404)
-        .json({ message: "Event not found", error: error.message });
+      clientResponse(res, 404, "Event not found");
     }
     await event.destroy();
-    return res.status(204).send();
+    successResponse(res, 204);
   } catch (error) {
-    return res.status(500).json({
-      message: "Someting went wrong, while deleting the event",
-      error: error.message,
-    });
+    serverResponse(
+      res,
+      500,
+      "Someting went wrong, while deleting the event",
+      error
+    );
   }
 };
 

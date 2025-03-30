@@ -1,6 +1,11 @@
 const bcrypt = require("bcryptjs");
 const { Op } = require("sequelize");
 const { User } = require("../models/userModel");
+const {
+  successResponse,
+  clientResponse,
+  serverResponse,
+} = require("../utils/responseHandler");
 
 // Controller to handle user registration
 const registerUser = async (req, res) => {
@@ -15,15 +20,9 @@ const registerUser = async (req, res) => {
       profile_info,
       role,
     });
-    return res.status(201).json({
-      message: "User registerd successfully",
-      user: newUser,
-    });
+    successResponse(res, 201, "User registerd successfully", newUser);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error while registering user", error: error.message });
+    serverResponse(res, 500, "Error while registering user", error);
   }
 };
 
@@ -39,34 +38,29 @@ const loginUser = async (req, res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ message: "User not found" });
+      clientResponse(res, 404, "User not found");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
-      return res.status(400).json({ message: "Invalid credentials" });
+      clientResponse(res, 401, "Invalid credentials");
     }
 
-    return res.status(200).json({
-      message: "Login successful",
-      user: { user_id: user.user_id, email: user.email },
-    });
+    const logedInUser = { user_id: user.user_id, email: user.email };
+    successResponse(res, 200, "Login successful", logedInUser);
   } catch (error) {
-    return res
-      .status(500)
-      .json({ message: "Error logging in", error: error.message });
+    serverResponse(res, 500, "Error while user login", error);
   }
 };
 
 // Get all users
 const getUsers = async (req, res) => {
-  console.log("Get Users");
   try {
     const users = await User.findAll();
-    return res.status(200).json(users);
+    successResponse(res, 200, "Success", users);
   } catch (error) {
-    return res.status(500).json({ message: "Error fetching users", error });
+    serverResponse(res, 500, "Error while fetching users", error);
   }
 };
 

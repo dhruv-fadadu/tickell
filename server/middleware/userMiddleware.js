@@ -1,41 +1,66 @@
 const { User } = require("../models/userModel");
+const { clientResponse, serverResponse } = require("../utils/responseHandler");
 
 const validateCreateUser = async (req, res, next) => {
   const { username, email, password, phone_num, role } = req.body;
 
   // validate that all required fields are present
   if (!username || !email || !password || !phone_num || !role) {
-    return res.status(400).json({ message: "Required fields are missing" });
+    return clientResponse(res, 400, "Required fields are missing");
   }
 
   // check if the username is taken
-  const existinUserWithUsername = await User.findOne({ where: { username } });
-  if (existinUserWithUsername) {
-    return res.status(400).json({ message: "Username is already taken" });
+  try {
+    const existinUserWithUsername = await User.findOne({ where: { username } });
+    if (existinUserWithUsername) {
+      return clientResponse(res, 409, "Username is already taken");
+    }
+  } catch (error) {
+    return serverResponse(
+      res,
+      500,
+      "Error while finding the user by username",
+      error
+    );
   }
 
   // check if the email is taken
   try {
     const existingUserWithEmail = await User.findOne({ where: { email } });
     if (existingUserWithEmail) {
-      return res.status(400).json({ message: "Email is already taken" });
+      return clientResponse(res, 409, "Email is already taken");
     }
-  } catch {
-    console.error("Error while finding the user by email: ", error);
-    throw error;
+  } catch (error) {
+    return serverResponse(
+      res,
+      500,
+      "Error while finding the user by email",
+      error
+    );
   }
 
   // password length check
   if (password.length < 6) {
-    return res
-      .status(400)
-      .json({ message: "Password must be at least 6 characters long" });
+    return clientResponse(
+      res,
+      422,
+      "Password must be at least 6 characters long"
+    );
   }
 
   // validate phone number
-  const exisitingUserPhoneNum = await User.findOne({ where: { phone_num } });
-  if (exisitingUserPhoneNum) {
-    return res.status(400).json({ message: "Contact number is already taken" });
+  try {
+    const exisitingUserPhoneNum = await User.findOne({ where: { phone_num } });
+    if (exisitingUserPhoneNum) {
+      return clientResponse(res, 409, "Contact number is already taken");
+    }
+  } catch (error) {
+    return serverResponse(
+      res,
+      500,
+      "Error while finding the user by phone number",
+      error
+    );
   }
 
   next();
