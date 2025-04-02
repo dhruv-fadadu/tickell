@@ -1,4 +1,9 @@
-const { Ticket } = require("../models/ticketModal");
+const { Ticket } = require("../models/ticketModel");
+const {
+  successResponse,
+  clientResponse,
+  serverResponse,
+} = require("../utils/responseHandler");
 
 const createTicket = async (req, res) => {
   try {
@@ -8,31 +13,26 @@ const createTicket = async (req, res) => {
       where: { event_id, seat_no },
     });
     if (existingTicket) {
-      return res.status(400).json({
-        message: "Duplicate ticket found",
-        error: "Duplicate ticket entry: Seat already booked for this event",
-      });
+      clientResponse(
+        res,
+        409,
+        "Duplicate ticket entry: Seat already booked for this event"
+      );
     }
 
     const ticket = await Ticket.create(req.body);
-    return res.status(201).json(ticket);
+    successResponse(res, 201, "Ticket created successfully", ticket);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error while creating ticket", error: error.message });
+    serverResponse(res, 500, "Error while creating ticket", error);
   }
 };
 
 const getTickets = async (req, res) => {
   try {
     const tickets = await Ticket.findAll();
-    return res.status(200).json(tickets);
+    successResponse(res, 200, "Success", tickets);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error fetching tickets", error: error.message });
+    serverResponse(res, 500, "Error fetching tickets", error);
   }
 };
 
@@ -40,14 +40,11 @@ const getTicketById = async (req, res) => {
   try {
     const ticket = await Ticket.findByPk(req.params.id);
     if (!ticket) {
-      return res.status(404).json({ message: "Ticket not found" });
+      clientResponse(res, 404, "Ticket not found");
     }
-    return res.status(200).json(ticket);
+    successResponse(res, 200, "Success", ticket);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error fetching ticket", error: error.message });
+    serverResponse(res, 500, "Error fetching ticket", error);
   }
 };
 
@@ -55,17 +52,12 @@ const updateTicket = async (req, res) => {
   try {
     const ticket = await Ticket.findByPk(req.params.id);
     if (!ticket) {
-      return res.status(400).json({ message: "Ticket not found" });
+      clientResponse(res, 404, "Ticket not found");
     }
     const updatedTicket = await ticket.update(req.body);
-    return res
-      .status(200)
-      .json({ message: "Ticket updated successfully", ticket: updatedTicket });
+    successResponse(res, 200, "Ticket updated successfully", updatedTicket);
   } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ message: "Error updating ticket", error: error.message });
+    serverResponse(res, 500, "Error updating ticket", error);
   }
 };
 
@@ -73,15 +65,12 @@ const deleteTicket = async (req, res) => {
   try {
     const ticket = await Ticket.findByPk(req.params.id);
     if (!ticket) {
-      return res.status(400).json({ message: "Ticket not found" });
+      clientResponse(res, 404, "Ticket not found");
     }
     await ticket.destroy();
-    return res.status(200).json({ message: "Ticket deleted successfully" });
+    successResponse(res, 204);
   } catch (error) {
-    console.log(error);
-    return res
-      .status(500)
-      .json({ message: "Error deleting ticket", error: error.message });
+    serverResponse(res, 500, "Error deleting ticket", error);
   }
 };
 
