@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const { User } = require("../models/userModel");
 const {
@@ -6,6 +7,9 @@ const {
   clientResponse,
   serverResponse,
 } = require("../utils/responseHandler");
+require("dotenv").config();
+
+const SECRET_KEY = process.env.SECRET_KEY;
 
 // Controller to handle user registration
 const registerUser = async (req, res) => {
@@ -47,7 +51,15 @@ const loginUser = async (req, res) => {
       clientResponse(res, 401, "Invalid credentials");
     }
 
-    const logedInUser = { user_id: user.user_id, email: user.email };
+    const token = jwt.sign({ user_id: user.user_id }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    console.log("login token: ", token);
+    const logedInUser = {
+      user_id: user.user_id,
+      email: user.email,
+      token: token,
+    };
     successResponse(res, 200, "Login successful", logedInUser);
   } catch (error) {
     serverResponse(res, 500, "Error while user login", error);

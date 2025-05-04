@@ -6,6 +6,7 @@ const {
   getUsers,
 } = require("../controllers/userController");
 const { validateCreateUser } = require("../middleware/userMiddleware");
+const { verifyToken } = require("../middleware/authMiddleware");
 
 // Route to register a new user
 router.post("/register", validateCreateUser, registerUser);
@@ -14,6 +15,6 @@ router.post("/register", validateCreateUser, registerUser);
 router.post("/login", loginUser);
 
 // Route to get all users (admin only or protected)
-router.get("/", getUsers);
+router.get("/", verifyToken, getUsers);
 
 module.exports = router;
