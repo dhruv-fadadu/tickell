@@ -5,6 +5,7 @@ const {
   loginUser,
   getUsers,
 } = require("../controllers/userController");
+const { refreshUserToken } = require("../controllers/authController");
 const { validateCreateUser } = require("../middleware/userMiddleware");
 const { verifyToken } = require("../middleware/authMiddleware");
 
@@ -13,6 +14,9 @@ router.post("/register", validateCreateUser, registerUser);
 
 // Route to login a user
 router.post("/login", loginUser);
+
+// Route to refresh token
+router.post("/refresh", refreshUserToken);
 
 // Route to get all users (admin only or protected)
 router.get("/", verifyToken, getUsers);
