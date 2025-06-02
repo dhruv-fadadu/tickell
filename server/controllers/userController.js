@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const { Op } = require("sequelize");
 const { User } = require("../models/userModel");
 const {
@@ -6,6 +7,9 @@ const {
   clientResponse,
   serverResponse,
 } = require("../utils/responseHandler");
+require("dotenv").config();
+
+const SECRET_KEY = process.env.SECRET_KEY;
 
 // Controller to handle user registration
 const registerUser = async (req, res) => {
@@ -20,9 +24,9 @@ const registerUser = async (req, res) => {
       profile_info,
       role,
     });
-    successResponse(res, 201, "User registerd successfully", newUser);
+    return successResponse(res, 201, "User registerd successfully", newUser);
   } catch (error) {
-    serverResponse(res, 500, "Error while registering user", error);
+    return serverResponse(res, 500, "Error while registering user", error);
   }
 };
 
@@ -38,19 +42,40 @@ const loginUser = async (req, res) => {
     });
 
     if (!user) {
-      clientResponse(res, 404, "User not found");
+      return clientResponse(res, 404, "User not found");
     }
 
     const isPasswordValid = await bcrypt.compare(password, user.password_hash);
 
     if (!isPasswordValid) {
-      clientResponse(res, 401, "Invalid credentials");
+      return clientResponse(res, 401, "Invalid credentials");
     }
 
-    const logedInUser = { user_id: user.user_id, email: user.email };
-    successResponse(res, 200, "Login successful", logedInUser);
+    const accessToken = jwt.sign({ user_id: user.user_id }, SECRET_KEY, {
+      expiresIn: "1h",
+    });
+    const refreshToken = jwt.sign({ user_id: user.user_id }, SECRET_KEY, {
+      expiresIn: "1d",
+    });
+
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      sameSite: "strict",
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      sameSite: "strict",
+      // TODO to uncomment for production
+      // secure: true,
+    });
+
+    const logedInUser = {
+      user_id: user.user_id,
+      email: user.email,
+    };
+    return successResponse(res, 200, "Login successful", logedInUser);
   } catch (error) {
-    serverResponse(res, 500, "Error while user login", error);
+    return serverResponse(res, 500, "Error while user login", error);
   }
 };
 
@@ -58,9 +83,9 @@ const loginUser = async (req, res) => {
 const getUsers = async (req, res) => {
   try {
     const users = await User.findAll();
-    successResponse(res, 200, "Success", users);
+    return successResponse(res, 200, "Success", users);
   } catch (error) {
-    serverResponse(res, 500, "Error while fetching users", error);
+    return serverResponse(res, 500, "Error while fetching users", error);
   }
 };
 

@@ -63,7 +63,7 @@ const validateCreateUser = async (req, res, next) => {
     );
   }
 
-  next();
+  return next();
 };
 
 module.exports = { validateCreateUser };

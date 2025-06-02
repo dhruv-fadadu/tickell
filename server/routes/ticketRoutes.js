@@ -10,14 +10,15 @@ const {
   validateCreateTicket,
   validateUpdateTicket,
 } = require("../middleware/ticketMiddleware");
+const { verifyToken } = require("../middleware/authMiddleware");
 
 const router = express.Router();
 
 // Define the routes
-router.post("/", validateCreateTicket, createTicket);
+router.post("/", verifyToken, validateCreateTicket, createTicket);
 router.get("/", getTickets);
 router.get("/:id", getTicketById);
-router.put("/:id", validateUpdateTicket, updateTicket);
-router.delete("/:id", deleteTicket);
+router.put("/:id", verifyToken, validateUpdateTicket, updateTicket);
+router.delete("/:id", verifyToken, deleteTicket);
 
 module.exports = router;

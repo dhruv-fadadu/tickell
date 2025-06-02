@@ -8,18 +8,19 @@ const {
   deleteEvent,
 } = require("../controllers/eventController");
 const { validateEvent } = require("../middleware/eventMiddleware");
+const { verifyToken } = require("../middleware/authMiddleware");
 
 // router to register new event
-router.post("/register", validateEvent, registerEvent);
+router.post("/register", verifyToken, validateEvent, registerEvent);
 
 // routers to fetch event details
 router.get("/", getEvents);
 router.get("/:id", getEventById);
 
 // routers to update the event
-router.put("/:id", validateEvent, updateEvent);
+router.put("/:id", verifyToken, validateEvent, updateEvent);
 
 // router to delete the event
-router.delete("/:id", deleteEvent);
+router.delete("/:id", verifyToken, deleteEvent);
 
 module.exports = router;
